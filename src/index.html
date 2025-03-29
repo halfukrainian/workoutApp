@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout App</title>
+    <link rel="stylesheet" href="assets/css/style.css"> <!-- Link to the external CSS file -->
+</head>
+<body class="index">
+    <div id="customAlert" class="hidden">
+        <div class="dialog-content">
+            <p id="alertMessage"></p>
+            <button class="deleteButton" onclick="closeAlert()">OK</button>
+        </div>
+    </div>
+
+    <!-- DEBUG BUTTONS-->
+    <div id="headerPlanner">
+        <div>
+            <input name="debugDaySelect" type="radio" id="Monday" value="Monday">
+            <label for="Monday">Mon</label>
+        </div>
+        <div>
+            <input name="debugDaySelect" type="radio" id="Tuesday" value="Tuesday">
+            <label for="Tuesday">Tue</label>
+        </div>
+        <div>
+            <input name="debugDaySelect" type="radio" id="Wednesday" value="Wednesday">
+            <label for="Wednesday">Wed</label>
+        </div>
+        <div>
+            <input name="debugDaySelect" type="radio" id="Thursday" value="Thursday">
+            <label for="Thursday">Thu</label>
+        </div>
+        <div>
+            <input name="debugDaySelect" type="radio" id="Friday" value="Friday">
+            <label for="Friday">Fri</label>
+        </div>
+        <div>
+            <input name="debugDaySelect" type="radio" id="Saturday" value="Saturday">
+            <label for="Saturday">Sat</label>
+        </div>
+        <div>
+            <input name="debugDaySelect" type="radio" id="Sunday" value="Sunday">
+            <label for="Sunday">Sun</label>
+        </div>
+    </div>
+    <!-- DEBUG BUTTONS-->
+
+    <div id="header">
+        <h1>Welcome to the <label id="workoutApp">Workout App</label><br><br><span id="currentDay"></span>:</h1>
+        <h2><span id="todayExercise"></span></h2>
+    </div>
+    <button class="button right" id="startWorkout">Start Workout</button>
+    <button class="button left" id="editExercises">Edit Exercises</button>
+    <button class="button" id="stats">Stats</button>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        let currentDay = new Date().toLocaleDateString('en-GB', { weekday: 'long' });
+        let todayExercise;
+
+        document.getElementById('currentDay').textContent = "It's " + currentDay;
+        document.getElementById('todayExercise').textContent = switchTodayExercise(currentDay);
+
+        document.querySelectorAll('input[name="debugDaySelect"]').forEach((radio) => {
+            radio.addEventListener('change', () => {
+                currentDay = document.querySelector('input[name="debugDaySelect"]:checked').value;
+                
+                document.getElementById('currentDay').textContent = "It's " + currentDay;
+                document.getElementById('todayExercise').textContent = switchTodayExercise(currentDay);
+
+                ipcRenderer.send('set-current-day', currentDay);
+            });
+        });
+
+        function switchTodayExercise(currentDay) {
+        switch (currentDay) {
+            case "Monday":
+                return "Horizontal Split";
+            case "Tuesday":
+                return "Legs";
+            case "Thursday":
+                return "Push";
+            case "Saturday":
+                return "Vertical";
+            default:
+                return "Rest Day";
+            }
+        }
+
+        function showCustomAlert(message) {
+                document.getElementById('alertMessage').innerText = message;
+                document.getElementById('customAlert').classList.remove('hidden');
+            }
+        function closeAlert() {
+            document.getElementById('customAlert').classList.add('hidden');
+        }
+        document.getElementById('startWorkout').addEventListener('click', function() {
+
+            if (switchTodayExercise(currentDay) == 'Rest Day') {
+                showCustomAlert(`It's Rest Day`);
+                return
+            }
+            else {
+            ipcRenderer.send('open-screen', 'exercise');
+            }
+        });
+        document.getElementById('editExercises').addEventListener('click', function() {
+            ipcRenderer.send('open-screen', 'edit');
+        });
+        document.getElementById('stats').addEventListener('click', function() {
+            ipcRenderer.send('open-screen', 'stats');
+        });
+        function startExercise() {
+            ipcRenderer.send('open-screen', 'exercise');
+        }
+        document.addEventListener('keydown', (event) => {
+            if (event.key === ' ') {
+                event.preventDefault(); 
+                    if (switchTodayExercise(currentDay) == 'Rest Day') {
+                    showCustomAlert(`It's Rest Day`);
+                    return
+                }
+                else {
+                ipcRenderer.send('open-screen', 'exercise');
+                }
+            }});
+
+        ipcRenderer.send('set-current-day', currentDay);
+
+    </script>
+    
+</body>
+</html>

@@ -1,0 +1,620 @@
+:root{
+    --background: #0b132b;
+    --background2: #1c2541;
+    --main-accent: #3a506b;
+    --button-hover: #4a6586;
+    --text-color: #6fffe9;
+}
+
+* {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    user-select: none;
+}
+body {
+    background-color: var(--background);
+    display: flex;
+    margin: 0;
+    padding: 0;
+}
+.index{
+    justify-content: center;
+}
+.button {
+    padding: 10px 20px;
+    font-size: 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin: 10px;
+    cursor: pointer;
+    background-color: var(--main-accent);
+    color: var(--text-color);
+    box-shadow: 4px 4px 4px black;
+    border: 0;
+    border-radius: 10px;
+    outline: none;
+    transition: background-color 0.3s ease;
+    width: 250px;
+    height: 100px;
+}
+.smallWideForm {
+    height: 40px;
+    width: 95%;
+    font-size: 16px;
+    align-items: center;
+    margin: 10x auto 20px auto;
+    display: block;
+}
+.button:hover {
+    background-color: var(--button-hover);
+}
+.index h1 { 
+    font-size: 40px;
+    color: var(--text-color);
+    text-align: center;
+    padding: 0;
+    margin: 0;
+}
+#header {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    background-color: var(--background2);
+    border-radius: 14px;
+    margin-top: 10px;
+    padding: 10px 20px 10px 20px;
+    position: relative;
+}
+
+@property --angle{
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
+}
+
+#header::after, #header::before {
+    content: '';
+    position:absolute;
+    height: 100%;
+    width: 100%;
+    background-image: conic-gradient(from var(--angle), #ff4545, #ffa200, #006aff, #ff0095, #ff4545);
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    z-index: -1;
+    padding: 3px;
+    border-radius: 15px;
+    animation: 5s spin linear infinite;
+}
+@keyframes spin{
+    from{
+        --angle: 0deg;
+    }
+    to{
+        --angle: 360deg;
+    }
+}
+#header::before {
+    filter: blur(1.5rem);
+    opacity: 0.5;
+}
+#workoutApp {
+    background: linear-gradient(90deg, var(--text-color), var(--main-accent));
+    background-clip: text;
+    color: transparent;
+    font-weight: 1000;
+}
+.index h2 {
+    color: var(--text-color);
+    font-size: 40px;
+    margin: 0;
+    background-color: var(--background2);
+}
+.right {
+    position: absolute;
+    top: 85%;
+    right: 25px;
+    transform: translateY(-50%);
+}
+.left {
+    position: absolute;
+    top: 85%;
+    left: 25px;
+    transform: translateY(-50%);
+}
+#stats {
+    position: absolute;
+    top: 68%;
+    right: 25px;
+    height: 50px;
+    width: 125px;
+}
+#addExerciseForm {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 5px;
+}
+#divPlanner {
+    display: inline-block;
+}
+#divForm, #divPlanner{
+    background-color: var(--background2);
+    border-radius: 14px;
+    border: 0;
+    padding: 10px 20px 0 20px;
+    display: block;
+    width: 400px;
+    margin-right: 20px;
+    margin-left: 20px;
+    box-shadow: 4px 4px 4px black;
+    max-height: 390px;
+}
+#divForm input, #newExerciseName {
+    font-size: 16px;
+}
+.exerciseFormDiv {
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 16px;
+}
+#dropzone {
+    background-color: var(--background);
+    padding: 4px 85px 4px 5px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    border: 2px dotted var(--button-hover);
+    color: #757575;
+}
+.edit {
+    justify-content: center;
+    flex-direction: column;
+}
+#newExerciseReps, #newExerciseWeight, #newExerciseSets, #newExerciseRestTime{
+    width: 50px;
+    text-align: left;
+    color: var(--text-color);
+    background-color: var(--background);
+    padding: 6px;
+    border: 0;
+    border-radius: 4px;
+}
+#newExerciseName, #newExerciseImage {
+    width: 220px;
+    text-align: left;
+    color: var(--text-color);
+    background-color: var(--background);
+    border: 0;
+    border-radius: 4px;
+    padding: 6px
+}
+.formDivider {
+    padding: 5px;
+    margin: 0;
+    background-color: var(--background);
+    justify-content: left;
+    border-radius: 4px;
+}
+.container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+#exerciseTable td input, #exerciseTable td label {
+    background-color: var(--background);
+    color: var(--text-color);
+    padding: 2px 4px 6px 4px; 
+    text-align: left;
+    height: 20px;
+    border: 0;
+    border-right: 0;
+    border-radius: 4px;
+    font-size: 16px;
+    margin: 0;
+}
+#exerciseTable td label {
+    background-color: transparent;
+}
+#exerciseTable td:nth-child(2) input, #exerciseTable td:nth-child(3) input {
+    width: 204px; 
+    
+}
+#exerciseTable td:nth-child(4) input,
+#exerciseTable td:nth-child(5) input,
+#exerciseTable td:nth-child(6) input, 
+#exerciseTable td:nth-child(7) input {
+    width: 50px; 
+}
+#exerciseTable thead {
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    text-align: left;
+    font-size: 16px;
+}
+#exerciseTable td:nth-child(1) {
+    border-radius: 10px;
+    background-color: transparent;
+    padding: 2px 4px 6px 4px; 
+    margin: auto 0 auto;
+    position: relative;
+    z-index: 1;
+}
+#exerciseTable td:nth-child(1)::After {
+    position: absolute;
+    content: '';
+    top: 48%;
+    left: 50%;
+    translate: -50% -50%;
+    padding: 13px 12px 13px 12px;
+    z-index: -1;
+    border-radius: 4px;
+    box-shadow: 2px 2px 2px black;
+    background: repeating-linear-gradient(
+    45deg,
+    var(--background),
+    var(--background) 2px,
+    var(--background2) 4px,
+    var(--background2) 6px);
+}
+tr td label{
+    cursor: grab;
+}
+.divTable {
+    margin: 0;
+    margin-right: 20px;
+    border-radius: 14px;
+    border: 0;
+    background-color: var(--background2);
+    padding: 10px 20px 10px 20px;
+    box-shadow: 4px 4px 4px black;
+    width: 72%;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    height: auto;
+    max-height: 390px;
+    box-sizing: border-box;
+}
+.divTable::-webkit-scrollbar {
+    display: none;
+}
+.deleteButton {
+    width: 60px;
+    height: 28px;
+    font-size: 16px;
+    text-align: center;
+    cursor: pointer;
+    background-color: var(--main-accent);
+    color: var(--text-color);
+    border: 0;
+    box-shadow: 2px 2px 1px black ;
+    border-radius: 4px;
+    margin: auto;
+    transition: background-color 0.3s ease
+}
+.deleteButton:hover{
+    background-color: var(--button-hover);
+}
+.deletePlanner {
+    width: 60px;
+    height: 28px;
+    font-size: 16px;
+    text-align: center;
+    cursor: pointer;
+    background-color: var(--main-accent);
+    color: var(--text-color);
+    border: 0;
+    box-shadow: 2px 2px 1px black ;
+    border-radius: 4px;
+    margin: auto;
+    transition: background-color 0.3s ease
+}
+.deletePlanner:hover{
+    background-color: var(--button-hover);
+}
+.edit h1 {
+    font-size: 45px;
+    position: fixed;
+    left: 50%;
+    top: 2.5%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(90deg, var(--text-color), var(--main-accent));
+    background-clip: text;
+    color: transparent;
+}
+.editHeader {
+    border: 0;
+    padding: 40px 20px 0px 20px;
+    background: var(--background2);
+    border-radius: 14px;
+    margin: 10px 20px 10px 20px;
+    box-shadow: 4px 4px 4px black;
+    text-align: center;
+    display: inline-flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+.tabSelect {
+    display: flex;
+    gap: 4px;
+}
+.tabSelect label {
+    text-align: center;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-color);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    width: 176px;
+    height: 40px;
+    font-size: 20px;
+    color: var(--text-color);
+    background-color: var(--background);
+    transition: background-color 0.3s ease;
+    box-shadow: 2px 2px 2px black;
+    border: 0;
+    border-radius: 6px 6px 0 0;
+    cursor: pointer;
+}
+.tabSelect label:hover {
+    background-color: var(--button-hover);
+}
+#databaseButton:checked + label,
+#plannerButton:checked + label {
+    background-color: var(--main-accent);
+    box-shadow: 2px 2px 2px black inset;
+}
+#divForm {
+    display: inline-block; 
+}
+
+#divPlanner {
+    display: none; 
+}
+.hidden {
+    display: none;
+  }
+  
+#customAlert {
+    position: fixed;
+    text-align: center;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--background2);
+    color: var(--text-color);
+    border-radius: 14px;
+    padding: 0 40px 40px 40px;
+    box-shadow: 4px 4px 4px black;
+    border: 2px solid var(--background);
+    font-size: 32px;
+    z-index: 5;
+  }
+  
+#headerPlanner {
+    display: flex;
+    gap: 2px;
+    padding: 0;
+    margin: 0;
+    align-items: flex-start;
+}
+.index #headerPlanner { /* DEBUG */
+    position: absolute;
+    gap: 5px;
+    top: 0%;
+    left: 0%;
+}
+#headerPlanner div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    align-items: stretch; 
+    width: 100%; 
+}
+#headerPlanner input[type="radio"] {
+    display: none;
+}
+#headerPlanner label {
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    height: 30px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--background);
+    border-radius: 0 0 4px 4px;
+    box-shadow: 2px 2px 2px black;
+    position: relative;
+    top: -10px;
+    color: var(--text-color);
+}
+#headerPlanner input[type="radio"]:checked + label {
+    background-color: var(--main-accent);
+    box-shadow: 2px 2px 2px black inset;
+}
+#headerPlanner label:hover {
+    background: var(--button-hover);
+}
+#plannerTable {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+#plannerDiv {
+    display: flex;
+    color: var(--text-color);
+    flex-direction: row;
+    flex-wrap: nowrap;
+    text-align: center;
+    font-size: 16px;
+}
+#rowNumber {
+    margin: auto;
+    color: #aaaaaa;
+    font-size: 16px;
+}
+.plannerRow2 {
+    color: var(--text-color);
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 10px;
+    width: 100%;
+    background-color: var(--background);
+    padding-left: 4px;
+    margin: 0 5px    0 10px;
+    height: 30px;
+    box-shadow: 2px 2px 2px black;
+    border-radius: 4px;
+    text-align: center;
+    cursor: grab;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+.plannerRow2 div {
+    margin: auto 0 auto 0;
+}
+.plannerDiv div {
+    padding: 4px;
+    display: block;
+    color: red;
+}
+#plannerDropDiv {
+    width: 100%;
+    background-color: var(--background);
+    margin: 0;
+    margin-left: 10px;
+    height: 30px;
+    box-shadow: 2px 2px 2px black;
+    border-radius: 4px;
+    border: 2px dotted var(--button-hover);
+}
+#plannerDropZone {
+    display: none;
+}
+#exerciseText {
+    position: absolute;
+    font-size: 72px;
+    color: var(--text-color);
+    top: 10px;
+    left: 40px;
+    margin: 0;
+}
+#totalTimer {
+    position: absolute;
+    top: 20px;
+    right: 40px;
+    color: var(--text-color);
+    margin: 0;
+    font-size: 32px;
+}
+#countdown {
+    position: absolute;
+    bottom: 20px;
+    left: 40px;
+    color: var(--text-color);
+    margin: 0;
+    font-size: 72px;
+}
+#exerciseImage {
+    height: 400px;
+    width: 540px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: left center;
+    position: fixed;
+    margin-left: 40px;
+    top: 19.5%;
+    overflow: hidden;
+}
+#infoContainer {
+    position: absolute;
+    right: 0;
+    top: 20%;
+    margin-right: 40px;
+    padding: 0;
+}
+#infoContainer div {
+    margin: 0;
+    padding: 0;
+    width: 500px;
+    margin-bottom: 40px;
+}
+#exerciseContainer {
+    display: none;
+}
+#infoContainer div p {
+    font-size: 60px;
+    color: var(--text-color);
+    font-weight: bold;
+    text-align: left;
+    margin: 0;
+}
+#infoContainer div p span {
+    float: right;
+}
+#startWorkout, #repDone {
+    background-image: url('../img/GUI/spacebar.png');
+    background-size: contain;
+    background-position: center;
+    background-position-y: -5px;
+    background-blend-mode: screen;
+    background-repeat: no-repeat;
+}
+#nextExerciseContainer {
+    position: absolute;
+    color: var(--text-color);
+    margin: 0 unset;
+    padding: 0 5px 0 0;
+    border-radius: 4px;
+}   
+.leftBottom{
+    bottom: 35px;
+    margin-left: 40px;
+    height: 100px;
+    flex-direction: row;
+}
+.rightCenter {
+    flex-direction: column;
+    top: 15.5%;
+    right: 40px;
+    height: 400px;
+}
+.smallExerciseImage {
+    width: 110px;
+    height: 72px;
+    border-radius: 4px;
+}
+.bigExerciseImage {
+    width: 300px;
+    height: 200px;
+    border-radius: 4px;
+}
+#nextExerciseDiv {
+    display: flex;
+    gap: 10px;
+    flex-direction: inherit;
+    background-color: var(--background2);
+    border-radius: 5px;
+}
+#nextExerciseDiv div {
+    padding: 5px;
+}
+#nextExerciseContainer p {
+    font-size: 20px;
+    margin: 0;
+    padding-right: 5px;
+}
+#nextExerciseImage {
+    background-size: cover;
+    background-position: center;
+}

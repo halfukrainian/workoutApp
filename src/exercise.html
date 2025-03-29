@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout App</title>
+    <link rel="stylesheet" href="assets/css/style.css"> <!-- Link to the external CSS file -->
+</head>
+<body class="exerciseScreen">
+    <h1 id="exerciseText"></h1>
+    <h2 id="totalTimer"></h2>
+    <div id="nextExerciseContainer" class="hidden">
+        <p id="nextExerciseStatus"></p>
+        <div id="nextExerciseDiv">
+            <div id="nextExerciseImage"></div> 
+            <div>
+                <p id="nextExercise"></p>
+                <p id="nextExerciseWeight"></p>
+            </div>
+        </div>
+    </div>
+    <div id="exerciseImage"></div>
+    <div id="exerciseContainer">
+        <button id="repDone"class="button right">Rep Done</button>
+        <div id="infoContainer">
+            <div id="infoSets"><p>Sets: <span id="infoSetsP"></span></p></div>
+            <div id="infoReps"><p>Reps: <span id="infoRepsP"></span></p></div>
+            <div id="infoWeight"><p>Weight: <span id="infoWeightP"></span></p></div>
+        </div>
+    </div>
+    <div id="restContainer">
+        <h2 id="countdown"></h2>
+        <button id="skipTimer" class="button right">Skip</button>
+
+    </div>
+    <button class="button right" id="backButton" style="display: none;">BACK TO MAIN MENU</button>
+</body>
+    <script>
+        const { ipcRenderer } = require('electron');
+        let currentDay;
+        let currentDayExerciseIds = ''; 
+        let seconds = 0;
+        let minutes = 0;
+        let gameStartSeconds = 10;
+        let countdownSeconds = gameStartSeconds;
+        let gameProgress = 1;
+        let intervalId = null;
+        let intervalId2 = null;
+        let exercise = null;
+        let setCounter = 0;
+        let audioPlaying = false;
+        let hours = 0;
+        let totalNumberOfExercises;
+        let exerciseCount = 1;
+        let nextExercise = null;
+        const nextExerciseContainer = document.getElementById('nextExerciseContainer');
+        const nextExerciseImage = document.getElementById('nextExerciseImage');
+
+        (async () => {
+            currentDayExerciseIds = await ipcRenderer.invoke('get-planner-ids', currentDay);
+            let totalExercises = currentDayExerciseIds.split(',');
+            totalNumberOfExercises = totalExercises.length;
+        })();
+
+        async function gameStatus(gameStatus) {
+            switch (gameStatus) {
+                case 0:
+                    return "Get Ready";
+                case 1:
+                    return "Restin'";
+                case 2:
+                    if (!exercise) {
+                        // Initialize exercise if not already done - Only happens once
+                        let exerciseId = currentDayExerciseIds.split(',')[0];
+                        currentDayExerciseIds = currentDayExerciseIds.slice(exerciseId.length + 1);
+                        exercise = await ipcRenderer.invoke('get-planner-table-exercise-name', exerciseId);
+                        let nextExerciseId = currentDayExerciseIds.split(',')[0];
+                        nextExercise = await ipcRenderer.invoke('get-planner-table-exercise-name', nextExerciseId);
+                        document.getElementById('exerciseImage').style.backgroundImage = `url(${exercise.image_path})`;
+                    }
+
+                    if (setCounter < exercise.default_sets) { // Check if there there are still exercises left in the set
+                        setCounter++;
+                        document.getElementById('exerciseImage').style.display = 'block';
+                        document.getElementById('exerciseContainer').style.display = 'block';
+                        document.getElementById('exerciseImage').style.backgroundImage = `url(${exercise.image_path})`;
+                        return exercise;
+
+                    }
+
+                    setCounter = 1;
+
+                    if (currentDayExerciseIds) { // fetches exercise data from DB
+                        let exerciseId = currentDayExerciseIds.split(',')[0];
+                        currentDayExerciseIds = currentDayExerciseIds.slice(exerciseId.length + 1);
+                        exercise = await ipcRenderer.invoke('get-planner-table-exercise-name', exerciseId);
+                        let nextExerciseId = currentDayExerciseIds.split(',')[0];
+                        nextExercise = await ipcRenderer.invoke('get-planner-table-exercise-name', nextExerciseId);
+                        document.getElementById('exerciseImage').style.backgroundImage = `url(${exercise.image_path})`;
+                        document.getElementById('exerciseImage').style.display = 'block';
+                        document.getElementById('exerciseContainer').style.display = 'block';
+                        exerciseCount++;
+                        return exercise;
+                    } else {
+                        return "Workout Complete";
+                    }
+
+                default:
+                    return "Unknown Status";
+            }
+        }
+
+        async function updateGameStatus(newStatus) {
+            console.log('Current Day Exercise IDs:', currentDayExerciseIds);
+                console.log('Set Counter:', setCounter);
+                console.log('Next Exercise:', nextExercise);
+
+            const exerciseText = await gameStatus(newStatus);
+            if (exerciseText.name) { // If gamestatus exercise - sets textcontent
+                document.getElementById('exerciseText').textContent = `${exerciseCount}/${totalNumberOfExercises} ${exerciseText.name}`;
+                document.getElementById('infoRepsP').textContent = `${exerciseText.default_reps}`;
+                document.getElementById('infoWeightP').textContent = `${exerciseText.default_weight}Kg`;
+                document.getElementById('infoSetsP').textContent = `${setCounter}/${exerciseText.default_sets}`
+                if (nextExercise) {
+                    document.getElementById('nextExercise').textContent = nextExercise.name;
+                    document.getElementById('nextExerciseImage').style.backgroundImage = `url(${nextExercise.image_path})`
+                    document.getElementById('nextExerciseWeight').textContent = `${nextExercise.default_weight}Kg`
+                    document.getElementById('nextExerciseStatus').textContent = `Next Exercise:`
+                }
+                if (!nextExercise) {
+                    document.getElementById('nextExerciseContainer').style.display = 'none';
+                }
+
+            }
+            else { // during rest status
+                document.getElementById('exerciseText').textContent = exerciseText;
+                    document.getElementById('nextExerciseStatus').textContent = `Next up:`
+
+                if (setCounter < exercise.default_sets) { 
+                    document.getElementById('nextExercise').textContent = exercise.name;
+                    document.getElementById('nextExerciseImage').style.backgroundImage = `url(${exercise.image_path})`
+                    document.getElementById('nextExerciseWeight').textContent = `Weight: ${exercise.default_weight}Kg`
+                }
+                else { // if it's the last of exercise of the set - shows the next exercise
+                    document.getElementById('nextExercise').textContent = nextExercise.name;
+                    document.getElementById('nextExerciseImage').style.backgroundImage = `url(${nextExercise.image_path})`
+                    document.getElementById('nextExerciseWeight').textContent = `Weight: ${nextExercise.default_weight}Kg`
+                }
+
+            }
+
+        }
+        updateGameStatus(0); 
+
+        document.getElementById('totalTimer').textContent = '0:00';
+        
+        function updateTimer() { // Tracks total time during exercise
+            if (seconds == 59) {
+                minutes++;
+                seconds = -1;
+            }
+            if (minutes == 59 && seconds == 59) {
+                hours++;
+                seconds = -1;
+                minutes = 0;
+            }
+            seconds++;
+            
+            let timeText = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+            if (hours > 0) {
+                timeText = `${hours}:${minutes < 10 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+            }
+            document.getElementById('totalTimer').textContent = timeText;
+        }
+
+        // sets default content for elements
+        document.getElementById('countdown').textContent = `0:${gameStartSeconds}`;
+        document.getElementById('exerciseImage').style.backgroundImage = `url("assets/img/GUI/arnold.png")`
+
+
+        async function updateCountdown() {
+            if (countdownSeconds == 0) {
+                if (isOdd(gameProgress)) { // Exercise Status - happens during exercise phase
+                    await updateGameStatus(2);
+                    toggleCountdown(0, 1000); 
+                    document.getElementById('countdown').textContent = '';
+                    document.getElementById('skipTimer').classList.add('hidden');
+                    nextExerciseContainer.classList.add('leftBottom');
+                    nextExerciseContainer.classList.remove('rightCenter', 'hidden');
+                    nextExerciseImage.classList.add('smallExerciseImage');
+                    nextExerciseImage.classList.remove('bigExerciseImage');
+                    gameProgress++;
+                    playSound('countdownEnd');
+                    return;
+                }
+                else { // Rest Status - happens during restin' phase
+                    if (setCounter >= exercise.default_sets && (!currentDayExerciseIds || currentDayExerciseIds.trim() === '')) {
+                        if (!audioPlaying) {
+                            playSound('finish');
+                            audioPlaying = true;
+                        }
+                        document.getElementById('exerciseText').textContent = "Workout Complete";
+                        document.getElementById('exerciseContainer').style.display = 'none';
+                        document.getElementById('totalTimer').style.fontSize = '72px';
+                        document.getElementById('totalTimer').style.color = 'yellow';
+                        document.getElementById('backButton').style.display = 'block';
+                        document.getElementById('exerciseImage').style.backgroundImage = 'url(assets/img/GUI/arnold_complete.png)';
+
+                        toggleCountdown(0, 1000);
+                        toggleTotalTimer(0);
+                        return;
+                    }
+                    // Rest Status - happens during restin' phase
+
+                    await updateGameStatus(1);
+                    document.getElementById('skipTimer').classList.remove('hidden');
+                    document.getElementById('exerciseImage').style.display = 'block';
+                    document.getElementById('exerciseImage').style.backgroundImage = 'url(assets/img/GUI/PainAndGain.jpg)';
+                    document.getElementById('exerciseContainer').style.display = 'none';
+                    nextExerciseContainer.classList.add('rightCenter');
+                    nextExerciseContainer.classList.remove('leftBottom');
+                    nextExerciseImage.classList.add('bigExerciseImage');
+                    nextExerciseImage.classList.remove('smallExerciseImage');
+                }
+                gameProgress++;
+                countdownSeconds = exercise.default_rest_time;
+            }
+            countdownSeconds--;
+            document.getElementById('countdown').textContent = `0:${countdownSeconds < 10 ? '0' + countdownSeconds : countdownSeconds}`;
+        }
+
+
+        function toggleCountdown(state, time) { // Countdown Timer that can be toggled
+            if (time == 1 && state === 1) {
+                updateCountdown();
+                toggleCountdown(1, 1000);
+                return
+            }
+            else {
+                if (state === 1 && !intervalId) {
+                    intervalId = setInterval(updateCountdown, 1000);
+                } else if (state === 0 && intervalId) {
+                    clearInterval(intervalId);
+                    intervalId = null;
+                }
+            }
+        }
+
+        toggleCountdown(1, 1000);
+
+        function toggleTotalTimer(state) { // Total Timer that can be toggled
+            if (state === 1 && !intervalId2) {
+                intervalId2 = setInterval(updateTimer, 1000);
+            } else if (state === 0 && intervalId2) {
+                clearInterval(intervalId2);
+                intervalId2 = null;
+            }
+        }
+        toggleTotalTimer(1); // Starts the total timer by default
+
+        function playSound(soundName) { // Function to play sounds
+            let audio;
+
+            switch (soundName) {
+                case 'countdownEnd':
+                    audio = new Audio('../src/assets/audio/bloop.mp3');
+                    break;
+                case 'finish':
+                    audio = new Audio('../src/assets/audio/finish.mp3');
+                    break;
+                default:
+                    return;
+            }
+            audio.volume = 0.6;
+            audio.play();
+            }
+        function goBack() {
+            ipcRenderer.send('open-screen', 'welcome');
+        }
+        function isOdd(number) {
+            return number % 2 !== 0;
+        }
+        document.getElementById('repDone').addEventListener('click', async function () {
+            toggleCountdown(1, 1); 
+        });
+
+        document.getElementById('backButton').addEventListener('click', function () {
+                goBack();
+            });
+
+        //debug - escape can be pressed to exit exercise screen
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                event.preventDefault(); 
+                goBack(); 
+            }
+        });
+        // space can be used to progress game instead of pressing button
+        document.addEventListener('keydown', (event) => {
+            if (event.key === ' ') {
+                event.preventDefault(); 
+                const button = document.getElementById('exerciseContainer');
+                const style = window.getComputedStyle(button);
+                if (button && style.display !== "none" && style.visibility !== "hidden" && !button.disabled) {
+                    toggleCountdown(1, 1);
+                }
+            }
+        });
+        
+        //button to skip timer
+        document.getElementById('skipTimer').addEventListener('click', function () {
+                countdownSeconds = 0;
+                toggleCountdown(1, 1);
+            });
+
+    </script>
+</html>

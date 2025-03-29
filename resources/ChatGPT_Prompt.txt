@@ -1,0 +1,15 @@
+I want to make workout desktop app to help me with home workouts. It will have few screens:
+
+welcome screen: you can click "edit" which will let you edit your exercises for specific day or "start" to start workout
+
+current excercise screen: 
+will show you timer of the current session since you clicked "start" on the previous screen, it will show you name and the picture of the current excercise as well as the weight you are using, and buttton "rep done" - after you click it it will show timer of 1 min counting down and disappears after its finished. if will also have "back button" to go to the previous screen, the rep count will also go down from 3 to 2 to 1 each time you click "rep done", after you click "rep done" last time it will take you to rep rest screen
+
+rest screen:
+will have music i nthe bacgkroud, timer of the current session since the start and time of the resting time of 2 minutes, and picture of the next excerdsie, after 2 minutes it will take you to the next excercise screen, same as current excercise screeen but with next excercise
+
+edit screen: 
+it will let you drag and drop pictures of the excercsie, change name of the excercise and reps and weight you will be using,
+
+all the excercises and wieghts and reps will be populated from the data you provide in edit screen.
+

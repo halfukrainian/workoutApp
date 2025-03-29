@@ -1,0 +1,529 @@
+    <!DOCTYPE html>
+    <html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Edit Exercise</title>
+        <link rel="stylesheet" href="assets/css/style.css">
+    </head>
+
+    <body class="edit">
+        <div id="customAlert" class="hidden">
+            <div class="dialog-content">
+                <p id="alertMessage"></p>
+                <button class="deleteButton" onclick="closeAlert()">OK</button>
+            </div>
+        </div>
+        <div class="editHeader">
+            <div class="tabSelect">
+                <input type="radio" id="databaseButton" name="tab" hidden checked>
+                <label for="databaseButton">Database</label>
+                
+                <input type="radio" id="plannerButton" name="tab" hidden>
+                <label for="plannerButton">Planner</label>
+            </div>
+            <h1>Exercise Database</h1>
+        </div>
+        <div class="container">
+            <div id="divForm">
+                <form id="addExerciseForm">
+                    <div class="exerciseFormDiv">
+                        <label for="newExerciseName">Exercise Name:</label>
+                        <input type="text" id="newExerciseName" placeholder="Exercise Name" required>
+                    </div>
+                    <div class="exerciseFormDiv">
+                        <label for="newExerciseImage">Image:</label>
+                        <div id="dropzone">drop an image here</div>
+                        <input type="hidden" id="newExerciseImage">
+                    </div>
+                    <div class="exerciseFormDiv">
+                        <label for="newExerciseReps">Reps:</label>
+                        <input type="number" id="newExerciseReps" value="10" required>
+                    </div>
+                    <div class="exerciseFormDiv">
+                        <label for="newExerciseSets">Sets:</label>
+                        <input type="number" id="newExerciseSets" value="3" required>
+                    </div>
+                    <div class="exerciseFormDiv">
+                        <label for="newExerciseWeight">Weight:</label>
+                        <input type="number" id="newExerciseWeight" step="0.5" value="10" required>
+                    </div>
+                    <div class="exerciseFormDiv">
+                        <label for="newExerciseRestTime">Rest:</label>
+                        <input type="number" id="newExerciseRestTime" value="30" step="5" required>
+                    </div>
+                    <br>
+                    <button type="submit" class="button smallWideForm" id="addNewExerciseButton">Add New Exercise</button>
+                </form>
+            </div>
+            <div id="divPlanner">
+                <div id="headerPlanner">
+                    <div>
+                        <input name="currentDay" type="radio" id="Monday" value="Monday" checked>
+                        <label for="Monday">Mon</label>
+                    </div>
+                    <div>
+                        <input name="currentDay" type="radio" id="Tuesday" value="Tuesday">
+                        <label for="Tuesday">Tue</label>
+                    </div>
+                    <div>
+                        <input name="currentDay" type="radio" id="Wednesday" value="Wednesday">
+                        <label for="Wednesday">Wed</label>
+                    </div>
+                    <div>
+                        <input name="currentDay" type="radio" id="Thursday" value="Thursday">
+                        <label for="Thursday">Thu</label>
+                    </div>
+                    <div>
+                        <input name="currentDay" type="radio" id="Friday" value="Friday">
+                        <label for="Friday">Fri</label>
+                    </div>
+                    <div>
+                        <input name="currentDay" type="radio" id="Saturday" value="Saturday">
+                        <label for="Saturday">Sat</label>
+                    </div>
+                    <div>
+                        <input name="currentDay" type="radio" id="Sunday" value="Sunday">
+                        <label for="Sunday">Sun</label>
+                    </div>
+                </div>
+                <div id="plannerTable">
+                    <!-- Rows will be populated here by JavaScript -->
+                </div>
+            </div>
+            <div class="divTable">
+                <table id="exerciseTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Image Path</th>
+                            <th>Reps</th>
+                            <th>Sets</th>
+                            <th>Weight</th>
+                            <th>Rest</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Rows will be populated here by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <button class="button right" id="backButton">BACK</button>
+    </body>
+        <script>
+            const { ipcRenderer } = require('electron');
+            const fs = require('fs');
+            const path = require('path');
+
+            const saveDirectory = path.join(__dirname, 'assets/exercises'); // Path to exercise images
+            if (!fs.existsSync(saveDirectory)) {
+                fs.mkdirSync(saveDirectory, { recursive: true });
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+
+                // Drag n Drop functionality
+                const dropzone = document.getElementById("dropzone");
+
+                dropzone.addEventListener("dragover", (e) => {
+                    e.preventDefault();
+                });
+                dropzone.addEventListener("dragleave", (e) => {
+                    e.preventDefault();
+                });
+                dropzone.addEventListener("drop", (e) => {
+                    e.preventDefault();
+
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        const file = files[0];
+                        const fileExtension = path.extname(file.name); // Extract file extension
+                        const newFileName = document.getElementById('newExerciseName').value.trim(); // Get exercise name from form
+
+                        if (!newFileName) {
+                            showCustomAlert('Please enter an exercise name before dropping the image.');
+
+                            return;
+                        }
+
+                        const destFileName = `${newFileName.replace(/ /g, '_')}${fileExtension}`; // Replace spaces with underscores in the new file name
+
+                        const destPath = path.join(saveDirectory, destFileName); // Create destination path
+
+                        // Copy the file to the destination
+                        fs.copyFile(file.path, destPath, (err) => {
+                            if (err) {
+                                console.error('Failed to save the file:', err);
+                            } else {
+                                // Update the input field with the relative path
+                                let relativePath = path.relative(__dirname, destPath).replace(/\\/g, '/');
+                                relativePath = relativePath.replace(/ /g, '_'); // Replace spaces with underscores
+                                document.getElementById('newExerciseImage').value = relativePath; 
+                            }
+                        });
+                    }
+                });
+            });
+
+
+            // Function to show custom alert since alert() is broken
+            function showCustomAlert(message) {
+                document.getElementById('alertMessage').innerText = message;
+                document.getElementById('customAlert').classList.remove('hidden');
+            }
+
+            // Function to close the custom alert
+            function closeAlert() {
+                document.getElementById('customAlert').classList.add('hidden');
+            }
+            // Function to debounce the save operation
+            function debounce(func, delay) {
+                let timer;
+                return function (...args) {
+                    clearTimeout(timer);
+                    timer = setTimeout(() => func.apply(this, args), delay);
+                };
+            }
+
+            // Function to save changes
+            async function saveChange(event) {
+                const id = event.target.getAttribute('data-id');
+                const field = event.target.getAttribute('data-field');
+                const value = event.target.value.trim();
+
+                // Skip saving if the value is empty and the field is required
+                if (value === "" && (field === "image_path" || field === "name")) {
+                    console.warn(`Skipping empty value for required field: ${field}`);
+                    return;
+                }
+
+                const updateData = {
+                    id,
+                    [field]: value
+                };
+
+                await ipcRenderer.invoke('update-exercise', updateData);
+            }
+
+            // Debounced save function
+            const debouncedSave = debounce(saveChange, 1000);
+
+            // Function to populate the exercises table
+            async function populateExerciseTable() {
+                const exercises = await ipcRenderer.invoke('get-exercises'); // Loads all exercises from db
+
+                const tableBody = document.querySelector('#exerciseTable tbody');
+                tableBody.innerHTML = ''; // Clear existing rows
+
+                exercises.forEach(exercise => {
+                    const row = document.createElement('tr');
+                    row.setAttribute('draggable', 'true');
+                    row.setAttribute('data-id', exercise.id);
+
+                    row.innerHTML = `
+                        <td><label id="exerciseId">${exercise.id}</label></td>
+                        <td><input type="text" value="${exercise.name || ''}" data-id="${exercise.id}" class="dbRow" data-field="name"></td>
+                        <td><input type="text" value="${exercise.image_path || ''}" data-id="${exercise.id}" class="dbRow" data-field="image_path"></td>
+                        <td><input type="number" value="${exercise.default_reps || ''}" data-id="${exercise.id}" class="dbRow" data-field="default_reps"></td>
+                        <td><input type="number" value="${exercise.default_sets || ''}" data-id="${exercise.id}" class="dbRow" data-field="default_sets"></td>
+                        <td><input type="number" value="${exercise.default_weight || ''}" step="0.5" data-id="${exercise.id}" class="dbRow" step="0.5" data-field="default_weight"></td>
+                        <td><input type="number" value="${exercise.default_rest_time || ''}" data-id="${exercise.id}" class="dbRow" step="5" data-field="default_rest_time"></td>
+                        <td>
+                            <button class="deleteButton" data-id="${exercise.id}">Delete</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+
+                    // Drag n Drop functionality
+                    row.addEventListener('dragstart', dragStart2);
+                    row.addEventListener('dragover', dragOver);
+                    row.addEventListener('drop', drop2);
+                    row.addEventListener('dragend', dragEnd2);
+
+                });
+                // Buttons for switching planner and add exercise tabs
+                document.querySelector('.tabSelect').addEventListener('change', (event) => {
+                    const showForm = event.target.id === 'databaseButton';
+                    document.getElementById('divForm').style.display = showForm ? 'inline-block' : 'none';
+                    document.getElementById('divPlanner').style.display = showForm ? 'none' : 'inline-block';
+                });
+
+                // Add event listeners for input changes
+                document.querySelectorAll('.dbRow').forEach(input => {
+                    input.addEventListener('input', debouncedSave);
+                });
+                // Add event listeners for delete buttons
+                document.querySelectorAll('.deleteButton').forEach(button => {
+                    button.addEventListener('click', (event) => {
+                        const id = event.target.getAttribute('data-id');
+                        ipcRenderer.send('delete-exercise', id);
+                    });
+                });
+
+                
+            }
+            let exercisesArray = []
+            let edited = false;
+
+            // Function to populate planner table
+            async function populatePlannerTable() {
+                var day = document.querySelector('input[name="currentDay"]:checked').value;
+
+                let exercises = await ipcRenderer.invoke('get-planner-db', day);
+
+                if(edited == false) {
+                    exercisesArray = exercises.split(',');
+                }
+                if(edited == true) {
+                    let exercises = exercisesArray.join(',');
+                    await ipcRenderer.invoke('update-planner-db', day, exercises);
+                }
+
+                const table = document.querySelector('#plannerTable');
+                table.innerHTML = ''; // Clear existing rows
+
+                rowNumber = 1;
+                if (exercises) {
+
+                    const promises = exercisesArray.map(async (exerciseId, index) => {
+                try {
+                    const plannerTableExerciseName = await ipcRenderer.invoke('get-planner-table-exercise-name', exerciseId);
+
+                    const exerciseDiv = document.createElement('div');
+                    exerciseDiv.setAttribute('draggable', 'true');
+                    exerciseDiv.setAttribute('data-index', index);
+                    exerciseDiv.setAttribute('data-id', exerciseId);
+                    exerciseDiv.classList.add('plannerRow');
+                    
+                    exerciseDiv.innerHTML = `
+                        <div id="plannerDiv">
+                            <div id="rowNumber">
+                                ${rowNumber}
+                            </div>
+                            <div class="plannerRow2">
+                                <div>
+                                    ${exerciseId}
+                                </div>
+                                <div>
+                                    <span>
+                                    ${plannerTableExerciseName.name || '<label style="font-weight: 700; color: red;">Exercise doesn\'t exist</label>'}
+                                    </span>
+                                </div>
+                            </div>
+                            <button class="deletePlanner" data-id="${index}">Delete</button>
+                        </div>
+                    `;
+
+                    table.appendChild(exerciseDiv);
+
+                    const deleteButton = exerciseDiv.querySelector('.deletePlanner');
+                    deleteButton.addEventListener('click', (event) => {
+                        const id = event.target.getAttribute('data-id');
+                        exercisesArray.splice(id, 1);
+                        edited = true;
+                        populateExerciseTable();
+                        populatePlannerTable();
+                    });
+                    
+                    // Add drag event listeners
+                    exerciseDiv.addEventListener('dragstart', dragStart);
+                    exerciseDiv.addEventListener('dragover', dragOver);
+                    exerciseDiv.addEventListener('drop', drop);
+                    exerciseDiv.addEventListener('dragend', dragEnd);
+
+                } catch (error) {
+                    console.error('Error fetching exercise name:', error.message);  
+                }
+                rowNumber++;
+            });
+
+            // Use Promise.all to wait for all promises to resolve
+            // Used to create an extra div to enable drag n dropping an exercise from the db
+            Promise.all(promises).then(() => {
+                // Create and append another exerciseDiv 
+                const additionalExerciseDiv = document.createElement('div');
+                
+                additionalExerciseDiv.setAttribute('id', 'plannerDropZone');
+                additionalExerciseDiv.innerHTML = `
+                    <div id="plannerDiv">
+                        <div id="rowNumber">
+                            ${rowNumber}
+                        </div>
+                    <div id="plannerDropDiv">
+                        
+                    </div>
+                    </div>
+                `;
+                table.appendChild(additionalExerciseDiv);
+
+                additionalExerciseDiv.addEventListener('dragover', dragOver);
+                additionalExerciseDiv.addEventListener('drop', drop2);
+
+            }).catch(err => {
+                console.error('Error in processing exercises:', err);
+            });
+
+                } else {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.innerHTML = `<div id="plannerDiv">No exercises found for ${day}.</div>`;
+                    table.appendChild(messageDiv);
+
+                     // Create and append another exerciseDiv 
+                    const additionalExerciseDiv = document.createElement('div');
+                    
+                    additionalExerciseDiv.setAttribute('id', 'plannerDropZone');
+                    additionalExerciseDiv.innerHTML = `
+                        <div id="plannerDiv">
+                            <div id="rowNumber">
+                                ${rowNumber}
+                            </div>
+                        <div id="plannerDropDiv">
+                            
+                        </div>
+                        </div>
+                    `;
+                    table.appendChild(additionalExerciseDiv);
+
+                    additionalExerciseDiv.addEventListener('dragover', dragOver);
+                    additionalExerciseDiv.addEventListener('drop', drop2);
+                    }
+                edited = false;
+            }
+            let draggedElement = null;
+
+            function dragStart(e) {
+                draggedElement = e.target;
+                setTimeout(() => {
+                    e.target.style.opacity = '0.5';
+                }, 0);
+            }
+            
+            function dragStart2(e) {
+                draggedElement = e.target;
+                plannerDropZone.style.display = "block";
+            }
+
+            function dragOver(e) {
+                e.preventDefault(); // Necessary to allow dropping  
+            }
+
+            function drop(e) { // function for swapping exercises in planner on drag n drop
+                e.preventDefault();  
+
+                const x = e.clientX; 
+                const y = e.clientY; 
+
+                const elements = document.elementsFromPoint(x, y);
+                let targetRow = elements.find(el => el.classList.contains('plannerRow'));
+
+                let draggedIndex = parseInt(draggedElement.getAttribute('data-index'));
+                let droppedIndex = parseInt(targetRow.getAttribute('data-index'));
+
+                if (targetRow && !isNaN(draggedIndex)) {
+                    //logic for swapping values
+
+                    let a = exercisesArray[draggedIndex];
+                    let b = exercisesArray[droppedIndex];
+                    exercisesArray[droppedIndex] = a;
+                    exercisesArray[draggedIndex] = b;
+
+                    edited = true;
+                    populatePlannerTable(); 
+
+                }
+
+                draggedElement.style.opacity = '1';
+            }
+            function drop2(e) { // function for dropping exercises from database to planner
+                e.preventDefault();
+
+                let draggedId = draggedElement.getAttribute('data-id');
+
+                if (exercisesArray[0] == '') {
+                    exercisesArray[0] = draggedId;
+                }
+                else {
+                    exercisesArray.push(draggedId);
+                }
+
+                edited = true;
+                populatePlannerTable();
+            }
+            function dragEnd(e) {
+                e.target.style.opacity = '1';
+                draggedElement = null;
+
+            }
+            function dragEnd2(e) {
+                plannerDropZone.style.display = "none";
+            }
+
+            // Initial population of the table
+            populateExerciseTable();
+            populatePlannerTable();
+
+            // Refresh table when notified
+            ipcRenderer.on('refresh-exercise-table', () => {
+                edited = false;
+                populateExerciseTable();
+                populatePlannerTable();
+            });
+
+            // Refresh planner table when selecting debug day button
+            document.querySelectorAll('input[name="currentDay"]').forEach((radio) => {
+                edited = false;
+                radio.addEventListener('change', () => {
+                populatePlannerTable(); 
+                });
+            });
+
+            // Handle back button
+            document.getElementById('backButton').addEventListener('click', function () {
+                ipcRenderer.send('open-screen', 'welcome');
+            });
+            
+            // Handle form submission for adding a new exercise
+            document.getElementById('addExerciseForm').addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                // Get the form data
+                const name = document.getElementById('newExerciseName').value.trim();
+                const imagePath = document.getElementById('newExerciseImage').value.trim();
+                const reps = document.getElementById('newExerciseReps').value.trim();
+                const sets = document.getElementById('newExerciseSets').value.trim();
+                const weight = document.getElementById('newExerciseWeight').value.trim();
+                const restTime = document.getElementById('newExerciseRestTime').value.trim();
+                // Validate form data
+                if (!name || !imagePath || !reps || !sets || !weight || !restTime) {
+                    showCustomAlert('Please fill out all fields.');
+                    return;
+                }
+
+                // Send the data to the main process
+                ipcRenderer.send('add-exercise', {
+                    name,
+                    imagePath,
+                    reps,
+                    sets,
+                    weight,
+                    restTime
+                });
+                // Reset the form
+                document.getElementById('addExerciseForm').reset();
+            });
+
+            function goBack() {
+                ipcRenderer.send('open-screen', 'welcome');
+            }
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    event.preventDefault(); // Prevent default behavior if needed
+                    goBack(); // Trigger the action
+                }
+            });
+        </script>
+</html>

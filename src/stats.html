@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout App</title>
+    <link rel="stylesheet" href="assets/css/style.css"> <!-- Link to the external CSS file -->
+</head>
+<body class="stats">
+    <h1>Stats Screen</h1>
+    <button class="button right" id="backButton">BACK</button>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+        document.getElementById('backButton').addEventListener('click', function() {
+            ipcRenderer.send('open-screen', 'welcome');
+        });
+
+        function goBack() {
+            ipcRenderer.send('open-screen', 'welcome');
+        }
+
+        // Add event listener for keydown events
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                event.preventDefault(); // Prevent default behavior if needed
+                goBack(); // Trigger the action
+            }
+        });
+    </script>
+</body>
+</html>
